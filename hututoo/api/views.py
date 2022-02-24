@@ -1,47 +1,62 @@
-from django.shortcuts import render, redirect
-# from .models import Register
-# from django.urls import reverse_lazy
-# from django.views.generic.edit import CreateView
-from .forms import RegisterForm
-# Create your views here.
+from functools import partial
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework import authentication, permissions
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
+from .models import *
+from .serializers import *
 
-def home(request):
-    template = 'api/index.html'
-    return render(request, template)
+from api import serializers
 
-# def register(request, CreateView):
-#     # if request.method == 'POST':
-#     #     username = request.POST.get('username')
-#     #     first_name = request.POST.get('first_name')
-#     #     last_name = request.POST.get('last_name')
-#     #     email = request.POST.get('email')
-#     #     password = request.POST.get('password')
-#     #     address = request.POST.get('address')
-#     #     city = request.POST.get('city')
-#     #     state = request.POST.get('state')
-#     #     zip_code = request.POST.get('zip_code')
-#     #     country = request.POST.get('country')
+
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
+
+class ListUsers(APIView):
+    # permission_classes = [ReadOnly]
+    def get(self, request):
+        quizs = Quizs.objects.all()
+        serializer = QuizSerializer(quizs, many=True)
+        return Response({'status': 200, 'payload': serializer.data})
+
+    def post(self, request):
+        serializer = QuizSerializer(data = request.data)
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
+
+        serializer.save()
+        return Response({'status': 200, 'payload': serializer.data, 'message': 'You have successfully Created Quiz.'})
+
+
+    def put(self, request):
+        pass
+
+    def patch(self, request):
+        try:
+            quizs = Quizs.objects.get(id = request.data['id'])
+            serializer = QuizSerializer(quizs, data = request.data, partial=True)
+            if not serializer.is_valid():
+                print(serializer.errors)
+                return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
+
+            serializer.save()
+            return Response({'status': 200, 'payload': serializer.data, 'message': 'You have successfully Created Quiz.'})
+
+        except Exception as e:
+            print(e)
+            return Response({'status': 403, 'message': 'Invalid ID'})
+
+
+    def delete(self, request):
+        try:
+            id = request.GET.get('id')
+            quizs = Quizs.objects.get(id=id)
+            quizs.delete()
+            return Response({'status': 200, 'message': 'Quiz Successfully deleted'})
         
-#     form_class = CustomUserCreationForm
-#     # success_url = reverse_lazy('login')
-    
-#     template = 'api/register.html'
-#     return render(request, template)
-
-# class register(CreateView):
-#     form_class = CustomUserCreationForm
-#     success_url = reverse_lazy('login')
-#     template_name = 'api/register.html'
-
-
-def register(response):
-    if response.method == "POST":
-        form = RegisterForm(response.POST)
-        if form.is_valid():
-            form.save()
-        return redirect("home")
-        
-    else:
-        form = RegisterForm()
-        
-    return render(response, "api/register.html", {"form":form})
+        except Exception as e:
+            print(e)
+            return Response({'status': 403, 'message': 'Invalid ID'})
