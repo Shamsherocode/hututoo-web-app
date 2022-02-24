@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     "rest_framework",
-    # "rest_framework.authtoken",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -75,14 +75,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hututoo.wsgi.application'
 
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework.authentication.TokenAuthentication',
-#     ],
-# 'DEFAULT_PERMISSION_CLASSES': [
-#     'rest_framework.permissions.IsAuthenticated',
-# ]
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+'DEFAULT_PERMISSION_CLASSES': [
+    'rest_framework.permissions.IsAuthenticated',
+]
+}
 
 
 # Database
@@ -136,6 +136,11 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
+MEDIA_URL = '/media/'
+# MEDIA_ROOT = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # LOGIN_REDIRECT_URL = '/'

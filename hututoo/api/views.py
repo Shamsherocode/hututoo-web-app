@@ -1,4 +1,3 @@
-from functools import partial
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -6,6 +5,7 @@ from rest_framework import authentication, permissions
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
 from .models import *
 from .serializers import *
+from rest_framework.authtoken.models import Token
 
 from api import serializers
 
@@ -14,12 +14,46 @@ class ReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
 
-class ListUsers(APIView):
-    # permission_classes = [ReadOnly]
+
+
+class QuizOptionView(APIView):
+    permission_classes = [ReadOnly]
+    def get(self, request):
+        data = QuizOption.objects.all()
+        serializer = QuizOptionSerializer(data, many=True)
+        return Response({'status': 200, 'payload': serializer.data})
+
+
+class QuizCategoryView(APIView):
+    permission_classes = [ReadOnly]
+    def get(self, request):
+        data = QuizCategory.objects.all()
+        serializer = QuizCategorySerializer(data, many=True)
+        return Response({'status': 200, 'payload': serializer.data})
+
+
+
+class RegisterUser(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data = request.data)
+        if not serializer.is_valid():
+            return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
+
+        serializer.save()
+        user = User.objects.get(username = serializer.data['username'])
+        token , _ = Token.objects.get_or_create(user=user)
+        return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
+
+
+class QuizView(APIView):
+    permission_classes = [ReadOnly]
     def get(self, request):
         quizs = Quizs.objects.all()
         serializer = QuizSerializer(quizs, many=True)
-        return Response({'status': 200, 'payload': serializer.data})
+        for i in quizs:
+            print(i)
+
+        return Response({'status': 200, 'payload': serializer.data, 'option': 'option'})
 
     def post(self, request):
         serializer = QuizSerializer(data = request.data)
@@ -32,7 +66,19 @@ class ListUsers(APIView):
 
 
     def put(self, request):
-        pass
+        try:
+            quizs = Quizs.objects.get(id = request.data['id'])
+            serializer = QuizSerializer(quizs, data = request.data)
+            if not serializer.is_valid():
+                print(serializer.errors)
+                return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
+
+            serializer.save()
+            return Response({'status': 200, 'payload': serializer.data, 'message': 'You have successfully Created Quiz.'})
+
+        except Exception as e:
+            print(e)
+            return Response({'status': 403, 'message': 'Invalid ID'})
 
     def patch(self, request):
         try:
