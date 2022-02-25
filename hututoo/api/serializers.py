@@ -19,7 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
 class QuizOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizOption
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['option1', 'option2']
 
 
 
@@ -35,6 +36,12 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quizs
         fields = '__all__'
+
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['options'] = QuizOptionSerializer(instance.options).data
+        return rep
 
     # def checkdate():
     #     date = datetime.now()

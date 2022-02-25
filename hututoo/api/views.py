@@ -1,3 +1,4 @@
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -50,10 +51,16 @@ class QuizView(APIView):
     def get(self, request):
         quizs = Quizs.objects.all()
         serializer = QuizSerializer(quizs, many=True)
-        for i in quizs:
-            print(i)
+        # data = Response(serializer.data).__dict__
+        # data1 = (data['data'])
+        # res = [ sub['options'] for sub in data1 ]
+        # print(res, 'name')
+        #     # <QuerySet [<QuizOption: RussiaUkraine>]>
+        # datass = QuizOption.objects.all()
+        # aa = datass.values('QuizOption').get()['QuizOption']
+        # print(aa)
 
-        return Response({'status': 200, 'payload': serializer.data, 'option': 'option'})
+        return Response({'status': 200, 'payload': serializer.data})
 
     def post(self, request):
         serializer = QuizSerializer(data = request.data)
