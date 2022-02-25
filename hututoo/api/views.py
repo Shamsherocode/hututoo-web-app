@@ -50,6 +50,7 @@ class QuizView(APIView):
     permission_classes = [ReadOnly]
     def get(self, request):
         quizs = Quizs.objects.all()
+        print(Quizs.objects.all())
         serializer = QuizSerializer(quizs, many=True)
         # data = Response(serializer.data).__dict__
         # data1 = (data['data'])

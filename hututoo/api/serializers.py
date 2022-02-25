@@ -28,7 +28,10 @@ class QuizOptionSerializer(serializers.ModelSerializer):
 class QuizCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizCategory
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['name']
+
+    
 
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -41,7 +44,10 @@ class QuizSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['options'] = QuizOptionSerializer(instance.options).data
+        rep['category'] = QuizCategorySerializer(instance.category).data
         return rep
+    
+
 
     # def checkdate():
     #     date = datetime.now()
