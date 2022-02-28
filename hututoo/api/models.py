@@ -33,3 +33,10 @@ class Quizs(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class VerifyUserOTP(models.Model):
+    otp = models.CharField(max_length=6, blank=True, null=True)
+
+    def __str__(self):
+        return self.otp

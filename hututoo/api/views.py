@@ -7,8 +7,12 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermis
 from .models import *
 from .serializers import *
 from rest_framework.authtoken.models import Token
+from hututoo import settings  
+from django.core.mail import send_mail  
 
 from api import serializers
+import random
+
 
 
 class ReadOnly(BasePermission):
@@ -42,25 +46,40 @@ class RegisterUser(APIView):
 
         serializer.save()
         user = User.objects.get(username = serializer.data['username'])
+        user.is_active = False
+        otp = random.randint(100000, 999999)
+        # User.objects.create(user = user)
+        # msg = f'Hello Alien...\nYour OTP is {otp}'
+        # send_mail(
+        #     'Welcome to Hututoo',
+        #     msg,
+        #     settings.EMAIL_HOST_USER,
+        #     [user.username],
+        #     fail_silently = False
+        # )
         token , _ = Token.objects.get_or_create(user=user)
         return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
+
+class VerifyOTP(APIView):
+    pass
+#     def post(self, request):
+#         user = User.objects.get(username = serializer.data['username'])
+#         get_otp = VerifyUserOTPSerializer(data = request.data)
+#         if get_otp:
+#             int(get_otp) == UserSerializer.objects.filter(user=user).last().otp
+#             user.is_active = True
+#             token , _ = Token.objects.get_or_create(user=user)
+#             return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
+#         else:
+#             return Response({'status': 403, 'message': 'Something went wrong!'})
+
 
 
 class QuizView(APIView):
     permission_classes = [ReadOnly]
     def get(self, request):
         quizs = Quizs.objects.all()
-        print(Quizs.objects.all())
         serializer = QuizSerializer(quizs, many=True)
-        # data = Response(serializer.data).__dict__
-        # data1 = (data['data'])
-        # res = [ sub['options'] for sub in data1 ]
-        # print(res, 'name')
-        #     # <QuerySet [<QuizOption: RussiaUkraine>]>
-        # datass = QuizOption.objects.all()
-        # aa = datass.values('QuizOption').get()['QuizOption']
-        # print(aa)
-
         return Response({'status': 200, 'payload': serializer.data})
 
     def post(self, request):
