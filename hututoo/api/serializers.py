@@ -1,4 +1,4 @@
-
+from django.forms import EmailField
 from rest_framework import serializers
 from .models import *
 # from django.contrib.auth.models import User
@@ -58,3 +58,8 @@ class QuizSerializer(serializers.ModelSerializer):
     #         raise serializers.ValidationError({'error': 'Date must me valid..'})
 
     #     return data
+
+
+class VerifyUserOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField()
