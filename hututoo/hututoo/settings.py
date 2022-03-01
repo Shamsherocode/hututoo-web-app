@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # AUTH_USER_MODEL = 'api.CustomUser' 
-# AUTH_USER_MODEL='api.Users'
+AUTH_USER_MODEL='api.User'
 
 # Application definition
 
@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     "rest_framework",
-    "rest_framework.authtoken",
+    # "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -75,14 +75,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hututoo.wsgi.application'
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-'DEFAULT_PERMISSION_CLASSES': [
-    'rest_framework.permissions.IsAuthenticated',
-]
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',
+#     ],
+# 'DEFAULT_PERMISSION_CLASSES': [
+#     'rest_framework.permissions.IsAuthenticated',
+# ]
+# }
 
 
 # Database

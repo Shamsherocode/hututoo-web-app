@@ -1,24 +1,46 @@
 import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth.models import User
-from rest_framework import authentication, permissions
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
+# from django.contrib.auth.models import User
+# from rest_framework import authentication, permissions
+# from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
 from .models import *
 from .serializers import *
-from rest_framework.authtoken.models import Token
+# from rest_framework.authtoken.models import Token
 
-from api import serializers
+# from api import serializers
 
 
-class ReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
+# class ReadOnly(BasePermission):
+#     def has_permission(self, request, view):
+#         return request.method in SAFE_METHODS
 
+
+class RegisterAPI(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = UserSerializer(data = data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': 200,
+                    'message': 'Register successfully',
+                    'data': serializer.data
+                })
+
+            return Response({
+                    'status': 400,
+                    'message': 'Something went wrong',
+                    'data': serializer.errors
+                })
+        
+        except Exception as e:
+            print(e)
 
 
 class QuizOptionView(APIView):
-    permission_classes = [ReadOnly]
+    # permission_classes = [ReadOnly]
     def get(self, request):
         data = QuizOption.objects.all()
         serializer = QuizOptionSerializer(data, many=True)
@@ -26,7 +48,7 @@ class QuizOptionView(APIView):
 
 
 class QuizCategoryView(APIView):
-    permission_classes = [ReadOnly]
+    # permission_classes = [ReadOnly]
     def get(self, request):
         data = QuizCategory.objects.all()
         serializer = QuizCategorySerializer(data, many=True)
@@ -34,20 +56,20 @@ class QuizCategoryView(APIView):
 
 
 
-class RegisterUser(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data = request.data)
-        if not serializer.is_valid():
-            return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
+# class RegisterUser(APIView):
+#     def post(self, request):
+#         serializer = UserSerializer(data = request.data)
+#         if not serializer.is_valid():
+#             return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
 
-        serializer.save()
-        user = User.objects.get(username = serializer.data['username'])
-        token , _ = Token.objects.get_or_create(user=user)
-        return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
+#         serializer.save()
+#         user = User.objects.get(username = serializer.data['username'])
+#         token , _ = Token.objects.get_or_create(user=user)
+#         return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
 
 
 class QuizView(APIView):
-    permission_classes = [ReadOnly]
+    # permission_classes = [ReadOnly]
     def get(self, request):
         quizs = Quizs.objects.all()
         print(Quizs.objects.all())
