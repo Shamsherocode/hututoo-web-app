@@ -8,36 +8,114 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 from .email import sendOTP
+# from random import randint
+
+
+# def random_with_N_digits(n):
+#     range_start = 10**(n-1)
+#     range_end = (10**n)-1
+#     return randint(range_start, range_end)
+
 
 # class ReadOnly(BasePermission):
 #     def has_permission(self, request, view):
 #         return request.method in SAFE_METHODS
 
 
-class RegisterAPI(APIView):
+# class RegisterAPI(APIView):
+#     def post(self, request):
+#         try:
+#             data = request.data
+#             serializer = UserSerializer(data = data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 data = serializer.data
+#                 sendOTP(data['email'])
+#                 print(sendOTP)
+#                 # return Response({
+#                 #     'status': 200,
+#                 #     'message': 'Register successfully',
+#                 #     'data': serializer.data
+#                 # })
+
+#                 return Response({
+#                         'data': data,
+#                         'status': status.HTTP_200_OK,
+#                         'message': 'Email Verification is done..',
+                        
+#                     })
+
+#             # return Response({
+#             #         'status': 400,
+#             #         'message': 'Something went wrong',
+#             #         'data': serializer.errors
+#             #     })
+#             return Response({
+#                         'data': serializer.errors,
+#                         'status': status.HTTP_400_BAD_REQUEST,
+#                         'message': 'Something went Wrong',
+                        
+#                     })
+        
+#         except Exception as e:
+#             print(e)
+
+
+class UserRegister(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = UserSerializer(data = data)
+            serializer = RegitserSerializer(data = data)
             if serializer.is_valid():
                 serializer.save()
-                sendOTP(serializer.data['email'])
-                # return Response({
-                #     'status': 200,
-                #     'message': 'Register successfully',
-                #     'data': serializer.data
-                # })
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                sendOTP(data['email'])
+                return Response({
+                    'status': 200,
+                    'message': 'Verification code sent on the mail address. Please check',
+                })
+            return Response({
+                'status': 400,
+                'message': 'Something went wrong',
+                'data': serializer.errors
+            })
 
-            # return Response({
-            #         'status': 400,
-            #         'message': 'Something went wrong',
-            #         'data': serializer.errors
-            #     })
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
         except Exception as e:
             print(e)
+
+class LoginUser(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = LoginSerializer(data)
+            verify_user = RegisterUser.objects.filter(email = data['email'])
+            
+            if not verify_user:
+                user = RegisterUser(email = data['email'])
+                user.save()
+                profile = UserProfile(user = user, public_key = user.email, private_key = user.email+"jkj")
+                profile.save()
+                # username = RegisterUser.objects.get(username=random_with_N_digits(12))
+            else:
+                user = verify_user[0]
+            sendOTP(user)
+            return Response({
+            'status': 200,
+            'message': 'Verification code sent on the mail address. Please check',
+            'data': serializer.data,
+            })
+        except Exception as e: 
+            print(e)
+
+
+class UserProfileView(APIView):
+    def get(self, request):
+        try: 
+            user_profile = UserProfile.objects.get(user = request.data['user'])
+            profile_serializer = UserProfileSerializer(user_profile)
+            # serializer = UserProfileSerializer(data, many=True)
+            return Response({'status': 200, 'payload': profile_serializer.data})
+        except:
+            return Response({'status': 400, 'message': 'Unauthenticted User'})
 
 
 class QuizOptionView(APIView):
@@ -91,34 +169,37 @@ class VerifyOTP(APIView):
             if serializer.is_valid():
                 email = serializer.data['email']
                 otp = serializer.data['otp']
-                user = User.objects.filter(email = email)
-                if not user.exists():
+                user = RegisterUser.objects.filter(email = email)[0]
+                if not user:
                     return Response({
+                        'data': 'Invalid Email address',
                         'status': 400,
                         'message': 'Something went wrong',
-                        'data': 'Invalid Email address'
+                        
                     })
 
-                if user[0].otp != otp:
+                if user.otp != otp:
                     return Response({
+                        'data': 'Invalid OTP',
                         'status': 400,
                         'message': 'Something went wrong',
-                        'data': 'Invalid OTP'
+                        
                     })
 
-                user = user.first()
                 user.is_verified = True
                 user.save() 
                 return Response({
+                    'data': serializer.data,
                         'status': 200,
                         'message': 'Email Verification is done..',
-                        'data': serializer.data
+                        
                     })
                 # return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({
+                        'data': serializer.errors,
                         'status': 400,
                         'message': 'Something went wrong',
-                        'data': serializer.errors
+                        
                     })
 
         except Exception as e:

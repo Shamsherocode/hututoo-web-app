@@ -3,21 +3,31 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from .manager import UserManager
+from .choices import *
+from random import randint
 
-class User(AbstractUser):
-    username = None
-    email = models.EmailField( unique=True)
+# class User(AbstractUser):
+#     username = None
+#     email = models.EmailField( unique=True)
+#     is_verified = models.BooleanField(default=False)
+#     otp = models.CharField(max_length=6, null=True, blank=True)
+    
+
+#     USERNAME_FIELD = 'email'
+#     REQUIRED_FIELDS = []
+    
+#     objects = UserManager()
+    
+#     # def name(self):
+#     #     return self.first_name + ' ' + self.last_name
+
+#     def __str__(self):
+#         return self.email
+
+class RegisterUser(models.Model):
+    email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
-    
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-    
-    objects = UserManager()
-    
-    # def name(self):
-    #     return self.first_name + ' ' + self.last_name
 
     def __str__(self):
         return self.email
@@ -62,3 +72,28 @@ class Quizs(models.Model):
 
 #     def __str__(self):
 #         return self.otp
+
+def random_with_N_digits(n):
+    range_start = 10**(n-1)
+    range_end = (10**n)-1
+    return randint(range_start, range_end)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(RegisterUser, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=255, blank=True, null=True)
+    avatar = models.ImageField(upload_to='media', blank=True, null=True)
+    username = models.CharField(max_length=12, blank=True, null=True)
+    public_key = models.CharField(max_length=16,  unique=True, blank=False)
+    private_key = models.CharField(max_length=16, unique=True, blank=False)
+    city = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=50, blank=True, null=True)
+    country = models.IntegerField(choices=COUNTRY, null=True, blank=True)
+
+
+    def save(self, *args, **kwargs):
+        self.username = random_with_N_digits(12)
+        super(UserProfile, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.username
+

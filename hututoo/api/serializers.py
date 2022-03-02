@@ -1,4 +1,3 @@
-from django.forms import EmailField
 from rest_framework import serializers
 from .models import *
 # from django.contrib.auth.models import User
@@ -63,3 +62,29 @@ class QuizSerializer(serializers.ModelSerializer):
 class VerifyUserOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
+
+
+class RegitserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegisterUser
+        fields = '__all__'
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    # otp = serializers.CharField()
+    # is_verified = serializers.BooleanField()
+    # is_active = serializers.BooleanField()
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
+
+
+    # def to_representation(self, instance):
+    #     rep = super().to_representation(instance)
+    #     rep['country'] = UserProfileSerializer(instance.country).data
+    #     rep['user'] = LoginSerializer(instance.email).data
+    #     return rep
