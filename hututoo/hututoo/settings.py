@@ -153,8 +153,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'shamsherc@ocodewire.com'
-EMAIL_HOST_PASSWORD = '@Chauhan3611#'
+EMAIL_HOST_USER = 'emailaddress'
+EMAIL_HOST_PASSWORD = 'password'
 
 # SendGrid Email Confuguration
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -166,4 +166,4 @@ EMAIL_HOST_PASSWORD = '@Chauhan3611#'
 # DEFAULT_FROM_EMAIL = 'shamsherc@ocodewire.com'
 
 
-CORS_ALLOWED_ORIGINS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
