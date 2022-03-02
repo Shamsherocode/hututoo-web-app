@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     'api',
     "rest_framework",
     # "rest_framework.authtoken",
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -162,3 +164,6 @@ EMAIL_HOST_PASSWORD = '@Chauhan3611#'
 # EMAIL_HOST_USER = 'apikey'
 # EMAIL_HOST_PASSWORD = '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'
 # DEFAULT_FROM_EMAIL = 'shamsherc@ocodewire.com'
+
+
+CORS_ALLOWED_ORIGINS = ['*']
