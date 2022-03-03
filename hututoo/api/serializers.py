@@ -3,10 +3,10 @@ from .models import *
 # from django.contrib.auth.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email', 'password', 'is_verified']
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['email', 'password', 'is_verified']
 
     # def create(self, validated_data):
     #     user = User.objects.create(email = validated_data['email'])
@@ -67,7 +67,7 @@ class VerifyUserOTPSerializer(serializers.Serializer):
 class RegitserSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegisterUser
-        fields = '__all__'
+        fields = ['id', 'email', 'is_verified']
 
 
 class LoginSerializer(serializers.Serializer):
@@ -83,8 +83,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-    # def to_representation(self, instance):
-    #     rep = super().to_representation(instance)
-    #     rep['country'] = UserProfileSerializer(instance.country).data
-    #     rep['user'] = LoginSerializer(instance.email).data
-    #     return rep
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['user'] = RegitserSerializer(instance.user).data
+        return rep
