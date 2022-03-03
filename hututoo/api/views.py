@@ -2,14 +2,21 @@ import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 # from django.contrib.auth.models import User
-# from rest_framework import authentication, permissions
-# from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
+from rest_framework import authentication, permissions
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
 from .models import *
 from .serializers import *
 from .email import sendOTP
+import hashlib
 # from random import randint
+from django.utils.crypto import get_random_string
+from functools import partial
 
+def userKey(n):
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*(-_=+)'
+    return get_random_string(n, chars)
 
 # def random_with_N_digits(n):
 #     range_start = 10**(n-1)
@@ -17,9 +24,18 @@ from .email import sendOTP
 #     return randint(range_start, range_end)
 
 
-# class ReadOnly(BasePermission):
-#     def has_permission(self, request, view):
-#         return request.method in SAFE_METHODS
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
+
+class MyPermission(permissions.BasePermission):
+    def __init__(self, allowed_methods):
+        super().__init__()
+        self.allowed_methods = allowed_methods
+
+    def has_permission(self, request, view):
+        return request.method in self.allowed_methods
+
 
 
 # class RegisterAPI(APIView):
@@ -62,6 +78,7 @@ from .email import sendOTP
 
 
 class UserRegister(APIView):
+    # permission_classes = [ReadOnly]
     def post(self, request):
         try:
             data = request.data
@@ -83,16 +100,19 @@ class UserRegister(APIView):
             print(e)
 
 class LoginUser(APIView):
+    # permission_classes = (partial(MyPermission, ['GET', 'POST', 'HEAD']),)
     def post(self, request):
         try:
             data = request.data
             serializer = LoginSerializer(data)
             verify_user = RegisterUser.objects.filter(email = data['email'])
-            
+            privat_key_gen = hashlib.sha256(b'data.email + data.id')
+            # chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*(-_=+)' + data['email']
+            key = privat_key_gen.hexdigest()
             if not verify_user:
                 user = RegisterUser(email = data['email'])
                 user.save()
-                profile = UserProfile(user = user, public_key = user.email, private_key = user.email+"jkj")
+                profile = UserProfile(user = user, private_key = key)
                 profile.save()
                 # username = RegisterUser.objects.get(username=random_with_N_digits(12))
             else:
@@ -108,9 +128,11 @@ class LoginUser(APIView):
 
 
 class UserProfileView(APIView):
-    def get(self, request):
+    # permission_classes = [ReadOnly]
+    def get(self, request, user):
+        print(user, 'ssssssssssssssss')
         try: 
-            user_profile = UserProfile.objects.get(user = request.data['user'])
+            user_profile = UserProfile.objects.get(user__email=user)
             profile_serializer = UserProfileSerializer(user_profile)
             # serializer = UserProfileSerializer(data, many=True)
             return Response({'status': 200, 'payload': profile_serializer.data})
@@ -162,6 +184,7 @@ class QuizCategoryView(APIView):
         # return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
 
 class VerifyOTP(APIView):
+    # permission_classes = (partial(MyPermission, ['GET', 'POST', 'HEAD']),)
     def post(self, request):
         try:
             data = request.data
@@ -169,36 +192,42 @@ class VerifyOTP(APIView):
             if serializer.is_valid():
                 email = serializer.data['email']
                 otp = serializer.data['otp']
-                user = RegisterUser.objects.filter(email = email)[0]
-                if not user:
+                # user = RegisterUser.objects.filter(email = email)
+                try:
+                    user = RegisterUser.objects.get(email=email)
+                    if user.otp != otp:
+                        return Response({
+                            # 'data': 'Invalid OTP',
+                            'status': 400,
+                            'message': 'Invalid OTP. Please enter corrent OTP',
+                            
+                        })
+
+                    user.is_verified = True
+                    # token , _ = Token.objects.get_or_create(user=email) 
+                    user.save()
+                    # print(user.id, 'sdfdsffffff')
+                    # token , _ = Token.objects.get_or_create(user=user.user) 
+                    # print(str(token), 'sssssssssssssssss')
                     return Response({
-                        'data': 'Invalid Email address',
+                            'status': 200,
+                            'message': 'Email Verification is done..',
+                        })
+                except:
+                # if not user:
+                    return Response({
+                        # 'message': 'Email not found..',
                         'status': 400,
-                        'message': 'Something went wrong',
+                        'message': 'Email not found. Please enter corrent Email Address',
                         
                     })
 
-                if user.otp != otp:
-                    return Response({
-                        'data': 'Invalid OTP',
-                        'status': 400,
-                        'message': 'Something went wrong',
-                        
-                    })
-
-                user.is_verified = True
-                user.save() 
-                return Response({
-                    'data': serializer.data,
-                        'status': 200,
-                        'message': 'Email Verification is done..',
-                        
-                    })
+                
                 # return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({
-                        'data': serializer.errors,
+                        # 'data': serializer.errors,
                         'status': 400,
-                        'message': 'Something went wrong',
+                        'payload': serializer.errors,
                         
                     })
 

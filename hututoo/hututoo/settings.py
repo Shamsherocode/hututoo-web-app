@@ -86,6 +86,15 @@ WSGI_APPLICATION = 'hututoo.wsgi.application'
 # ]
 # }
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.TokenAuthentication',
+#     )
+# }
+
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -153,8 +162,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'emailaddress'
-EMAIL_HOST_PASSWORD = 'password'
+EMAIL_HOST_USER = 'shamsherc@ocodewire.com'
+EMAIL_HOST_PASSWORD = '@Chauhan3611#'
 
 # SendGrid Email Confuguration
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

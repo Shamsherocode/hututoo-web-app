@@ -15,6 +15,6 @@ urlpatterns = [
     path('register/', UserRegister.as_view()),
     path('verify-otp/', VerifyOTP.as_view()),
     path('login/', LoginUser.as_view()),
-    path('user-profile/', UserProfileView.as_view()),
+    path('user-profile/<str:user>/', UserProfileView.as_view()),
     # path('verify-otp/', VerifyOTP.as_view()),
 ]

@@ -80,20 +80,21 @@ def random_with_N_digits(n):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(RegisterUser, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
     avatar = models.ImageField(upload_to='media', blank=True, null=True)
-    username = models.CharField(max_length=12, blank=True, null=True)
+    mobile = models.CharField(max_length=12, blank=True, null=True)
     public_key = models.CharField(max_length=16,  unique=True, blank=False)
     private_key = models.CharField(max_length=16, unique=True, blank=False)
     city = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(max_length=50, blank=True, null=True)
-    country = models.IntegerField(choices=COUNTRY, null=True, blank=True)
+    # country = models.IntegerField(choices=COUNTRY, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
-        self.username = random_with_N_digits(12)
+        self.public_key = random_with_N_digits(12)
         super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.username
+        return self.public_key
 
