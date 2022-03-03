@@ -25,7 +25,7 @@ SECRET_KEY = '_10obpnnx5aj7(#$7l8hcyu+972^7384dayjwc9@@37x!2tzlu'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.psd2htmlx.com', 'www.api.psd2htmlx.com', '165.227.11.15']
 
 # AUTH_USER_MODEL = 'api.CustomUser' 
 # AUTH_USER_MODEL='api.User'
@@ -162,8 +162,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'shamsherc@ocodewire.com'
-EMAIL_HOST_PASSWORD = '@Chauhan3611#'
+EMAIL_HOST_USER = 'email_address'
+EMAIL_HOST_PASSWORD = 'password'
 
 # SendGrid Email Confuguration
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
