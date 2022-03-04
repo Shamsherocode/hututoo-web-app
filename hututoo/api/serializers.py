@@ -87,3 +87,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep['user'] = RegitserSerializer(instance.user).data
         return rep
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['user', 'event', 'date_time', 'user_points', 'points_method', 'points_status']
+        # depth = 1
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['user'] = RegitserSerializer(instance.user).data
+        # rep['points_method'] = TransactionSerializer(instance.points_method).data
+        return rep

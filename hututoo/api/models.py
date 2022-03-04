@@ -6,23 +6,6 @@ from .manager import UserManager
 from .choices import *
 from random import randint
 
-# class User(AbstractUser):
-#     username = None
-#     email = models.EmailField( unique=True)
-#     is_verified = models.BooleanField(default=False)
-#     otp = models.CharField(max_length=6, null=True, blank=True)
-    
-
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = []
-    
-#     objects = UserManager()
-    
-#     # def name(self):
-#     #     return self.first_name + ' ' + self.last_name
-
-#     def __str__(self):
-#         return self.email
 
 class RegisterUser(models.Model):
     email = models.EmailField(unique=True)
@@ -55,23 +38,17 @@ class QuizOption(models.Model):
 class Quizs(models.Model):
     category = models.ForeignKey(QuizCategory, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, blank=False, null=False)
-    created = models.DateTimeField()
+    point = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
     options = models.OneToOneField(QuizOption, on_delete=models.CASCADE)
     img = models.ImageField(upload_to='media', blank=False, null=False)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
     publish_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     notice = models.TextField()
 
     def __str__(self):
         return self.name
 
-
-# class VerifyUserOTP(models.Model):
-#     otp = models.CharField(max_length=6, blank=True, null=True)
-
-#     def __str__(self):
-#         return self.otp
 
 def random_with_N_digits(n):
     range_start = 10**(n-1)
@@ -88,7 +65,6 @@ class UserProfile(models.Model):
     private_key = models.CharField(max_length=16, unique=True, blank=False)
     city = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(max_length=50, blank=True, null=True)
-    # country = models.IntegerField(choices=COUNTRY, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -98,3 +74,14 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.public_key
 
+
+class Transaction(models.Model):
+    user = models.ForeignKey(RegisterUser, on_delete=models.CASCADE)
+    event = models.ForeignKey(Quizs, on_delete=models.CASCADE, null=True, blank=True)
+    date_time = models.DateTimeField(auto_now_add=True)
+    user_points = models.IntegerField(null=False, blank=False)  
+    points_method = models.IntegerField(choices=POINTS, null=False, blank=False)
+    points_status = models.IntegerField(choices=POINTS_STATUS, null=False, blank=False)
+
+    def __str__(self):
+        return self.user.email

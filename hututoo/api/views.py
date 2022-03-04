@@ -1,28 +1,26 @@
-import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-# from django.contrib.auth.models import User
 from rest_framework import authentication, permissions
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
 from .models import *
 from .serializers import *
 from .email import sendOTP
-import hashlib
-# from random import randint
-from django.utils.crypto import get_random_string
 from functools import partial
 
-def userKey(n):
-    chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*(-_=+)'
-    return get_random_string(n, chars)
+import json
+import threading
+import hashlib
 
-# def random_with_N_digits(n):
-#     range_start = 10**(n-1)
-#     range_end = (10**n)-1
-#     return randint(range_start, range_end)
+class EmailThread(threading.Thread):
+    def __init__(self, sendOTP):
+        self.sendOTP = sendOTP
+        threading.Thread.__init__(self)
 
+    def run(self):
+        self.sendOTP()
+       
 
 class ReadOnly(BasePermission):
     def has_permission(self, request, view):
@@ -35,46 +33,6 @@ class MyPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in self.allowed_methods
-
-
-
-# class RegisterAPI(APIView):
-#     def post(self, request):
-#         try:
-#             data = request.data
-#             serializer = UserSerializer(data = data)
-#             if serializer.is_valid():
-#                 serializer.save()
-#                 data = serializer.data
-#                 sendOTP(data['email'])
-#                 print(sendOTP)
-#                 # return Response({
-#                 #     'status': 200,
-#                 #     'message': 'Register successfully',
-#                 #     'data': serializer.data
-#                 # })
-
-#                 return Response({
-#                         'data': data,
-#                         'status': status.HTTP_200_OK,
-#                         'message': 'Email Verification is done..',
-                        
-#                     })
-
-#             # return Response({
-#             #         'status': 400,
-#             #         'message': 'Something went wrong',
-#             #         'data': serializer.errors
-#             #     })
-#             return Response({
-#                         'data': serializer.errors,
-#                         'status': status.HTTP_400_BAD_REQUEST,
-#                         'message': 'Something went Wrong',
-                        
-#                     })
-        
-#         except Exception as e:
-#             print(e)
 
 
 class UserRegister(APIView):
@@ -106,15 +64,9 @@ class LoginUser(APIView):
             data = request.data
             serializer = LoginSerializer(data)
             verify_user = RegisterUser.objects.filter(email = data['email'])
-            privat_key_gen = hashlib.sha256(b'data.email + data.id')
-            # chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*(-_=+)' + data['email']
-            key = privat_key_gen.hexdigest()
             if not verify_user:
                 user = RegisterUser(email = data['email'])
                 user.save()
-                profile = UserProfile(user = user, private_key = key)
-                profile.save()
-                # username = RegisterUser.objects.get(username=random_with_N_digits(12))
             else:
                 user = verify_user[0]
             sendOTP(user)
@@ -123,65 +75,35 @@ class LoginUser(APIView):
             'message': 'Verification code sent on the mail address. Please check',
             'data': serializer.data,
             })
-        except Exception as e: 
-            print(e)
-
+        except: 
+            return Response({
+            'status': 400,
+            'message': 'Please Type correct Email Address',
+            })
 
 class UserProfileView(APIView):
     # permission_classes = [ReadOnly]
     def get(self, request, user):
-        print(user, 'ssssssssssssssss')
         try: 
             user_profile = UserProfile.objects.get(user__email=user)
             profile_serializer = UserProfileSerializer(user_profile)
-            # serializer = UserProfileSerializer(data, many=True)
             return Response({'status': 200, 'payload': profile_serializer.data})
         except:
             return Response({'status': 400, 'message': 'Unauthenticted User'})
 
-
-class QuizOptionView(APIView):
+class EventOptionView(APIView):
     # permission_classes = [ReadOnly]
     def get(self, request):
         data = QuizOption.objects.all()
         serializer = QuizOptionSerializer(data, many=True)
         return Response({'status': 200, 'payload': serializer.data})
 
-
-class QuizCategoryView(APIView):
+class EventCategoryView(APIView):
     # permission_classes = [ReadOnly]
     def get(self, request):
         data = QuizCategory.objects.all()
         serializer = QuizCategorySerializer(data, many=True)
         return Response({'status': 200, 'payload': serializer.data})
-
-
-
-# class RegisterUser(APIView):
-#     def post(self, request):
-#         serializer = UserSerializer(data = request.data)
-#         if not serializer.is_valid():
-#             return Response({'status': 403, 'payload': serializer.errors, 'message': 'Something went wrong'})
-
-#         serializer.save()
-#         user = User.objects.get(username = serializer.data['username'])
-#         token , _ = Token.objects.get_or_create(user=user)
-#         return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
-        # serializer.save()
-        # user = User.objects.get(username = serializer.data['username'])
-        # user.is_active = False
-        # otp = random.randint(100000, 999999)
-        # User.objects.create(user = user)
-        # msg = f'Hello Alien...\nYour OTP is {otp}'
-        # send_mail(
-        #     'Welcome to Hututoo',
-        #     msg,
-        #     settings.EMAIL_HOST_USER,
-        #     [user.username],
-        #     fail_silently = False
-        # )
-        # token , _ = Token.objects.get_or_create(user=user)
-        # return Response({'status': 200, 'payload': serializer.data, 'token': str(token), 'message': 'You have successfully Register.'})
 
 class VerifyOTP(APIView):
     # permission_classes = (partial(MyPermission, ['GET', 'POST', 'HEAD']),)
@@ -192,51 +114,47 @@ class VerifyOTP(APIView):
             if serializer.is_valid():
                 email = serializer.data['email']
                 otp = serializer.data['otp']
-                # user = RegisterUser.objects.filter(email = email)
                 try:
                     user = RegisterUser.objects.get(email=email)
                     if user.otp != otp:
                         return Response({
-                            # 'data': 'Invalid OTP',
                             'status': 400,
-                            'message': 'Invalid OTP. Please enter corrent OTP',
-                            
+                            'message': 'Invalid OTP. Please enter corrent OTP',  
                         })
+                    else:
+                        if not user.is_verified:
+                            user.is_verified = True
 
-                    user.is_verified = True
-                    # token , _ = Token.objects.get_or_create(user=email) 
-                    user.save()
-                    # print(user.id, 'sdfdsffffff')
-                    # token , _ = Token.objects.get_or_create(user=user.user) 
-                    # print(str(token), 'sssssssssssssssss')
-                    return Response({
-                            'status': 200,
-                            'message': 'Email Verification is done..',
-                        })
+                            user.save()
+                            privat_key_gen = hashlib.sha256(b'data.email + data.id')
+                            key = privat_key_gen.hexdigest()
+                            profile = UserProfile(user = user, private_key = key)
+                            profile.save()
+                            points = Transaction(user = user, user_points=10000, points_method=1, points_status=1)
+                            points.save()
+                        return Response({
+                                'status': 200,
+                                'message': 'Email Verification is done..',
+                            })
                 except:
-                # if not user:
                     return Response({
-                        # 'message': 'Email not found..',
                         'status': 400,
                         'message': 'Email not found. Please enter corrent Email Address',
                         
                     })
 
-                
-                # return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({
-                        # 'data': serializer.errors,
                         'status': 400,
                         'payload': serializer.errors,
                         
                     })
+        except:
+            return Response({
+                        'status': 400,
+                        'message': 'Something Went Wrong',
+                    })
 
-        except Exception as e:
-            print(e)
-
-
-
-class QuizView(APIView):
+class EventView(APIView):
     # permission_classes = [ReadOnly]
     def get(self, request):
         quizs = Quizs.objects.all()
@@ -294,3 +212,12 @@ class QuizView(APIView):
         except Exception as e:
             print(e)
             return Response({'status': 403, 'message': 'Invalid ID'})
+
+class TransactionView(APIView):
+    def get(self, request, user):
+        try: 
+            transaction = Transaction.objects.get(user__email=user)
+            transactions = TransactionSerializer(transaction)
+            return Response({'status': 200, 'payload': transactions.data})
+        except:
+            return Response({'status': 400, 'message': 'Unauthenticted User'})
