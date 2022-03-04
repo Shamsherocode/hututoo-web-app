@@ -25,7 +25,7 @@ SECRET_KEY = '_10obpnnx5aj7(#$7l8hcyu+972^7384dayjwc9@@37x!2tzlu'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['api.psd2htmlx.com', 'www.api.psd2htmlx.com', '165.227.11.15']
+ALLOWED_HOSTS = ['api.psd2htmlx.com', 'www.api.psd2htmlx.com', '159.223.153.96']
 
 # AUTH_USER_MODEL = 'api.CustomUser' 
 # AUTH_USER_MODEL='api.User'
