@@ -47,6 +47,11 @@ class QuizSerializer(serializers.ModelSerializer):
         return rep
     
 
+class QuizSerializerTransaction(serializers.ModelSerializer):
+    class Meta:
+        model = Quizs
+        fields = ['name']
+
 
     # def checkdate():
     #     date = datetime.now()
@@ -69,6 +74,11 @@ class RegitserSerializer(serializers.ModelSerializer):
         model = RegisterUser
         fields = ['id', 'email', 'is_verified']
 
+
+class RegitserSerializerTransaction(serializers.ModelSerializer):
+    class Meta:
+        model = RegisterUser
+        fields = ['email']
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -97,6 +107,6 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['user'] = RegitserSerializer(instance.user).data
-        # rep['points_method'] = TransactionSerializer(instance.points_method).data
+        rep['user'] = RegitserSerializerTransaction(instance.user).data
+        rep['event'] = QuizSerializerTransaction(instance.event).data
         return rep

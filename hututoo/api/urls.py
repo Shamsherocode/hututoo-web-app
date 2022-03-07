@@ -1,7 +1,8 @@
 
 from unicodedata import name
-from .views import EventView, EventCategoryView, EventOptionView, UserRegister, VerifyOTP, LoginUser, UserProfileView, TransactionView
+from .views import EventView, EventCategoryView, EventOptionView, UserRegister, VerifyOTP, LoginUser, UserProfileView, TransactionView, PredictView
 from django.urls import path
+# from . import views
 
 urlpatterns = [
     path('events/', EventView.as_view()),
@@ -12,4 +13,6 @@ urlpatterns = [
     path('login/', LoginUser.as_view(), name='login'),
     path('user-profile/<str:user>/', UserProfileView.as_view()),
     path('transaction/<str:user>/', TransactionView.as_view()),
+    path('predict/<str:user>/<int:event_id>/', PredictView.as_view()),
+    # path('predict/', views.predict, name='predict'),
 ]

@@ -69,7 +69,6 @@ class UserProfile(models.Model):
 
     def save(self, *args, **kwargs):
         self.public_key = random_with_N_digits(12)
-        print(self.public_key, 'sdfsdfsdf')
         super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):

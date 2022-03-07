@@ -1,3 +1,4 @@
+from urllib import request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +10,7 @@ from .serializers import *
 from .email import sendOTP
 from functools import partial
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 
 import json
 import threading
@@ -233,3 +235,28 @@ class TransactionView(APIView):
 
 def view_404(request, exception=None):
     return Response({'status': 500, 'message': 'Invalid Request'})
+
+
+class PredictView(APIView):
+    def post(self, request, **kwargs):
+        print(kwargs)
+        user = get_object_or_404(RegisterUser, email=kwargs['user'])# RegisterUser.object.get(email = user)
+        print(user, 'ssssssss')
+        event = get_object_or_404(Quizs, id=kwargs['event_id'])
+        print(event, 'eve')
+        # try:
+        # Create  Validator for points 
+        trans = Transaction(
+            user = user,
+            event = event,
+            user_points = event.point,
+            points_method ="Events Points",
+            points_status = "Debit"
+        )
+        trans.save()
+        return Response({'status': 200, 'message': 'success'})
+        # except:
+        #     return Response({'status': 200, 'message': 'Error'})
+        
+
+ 
