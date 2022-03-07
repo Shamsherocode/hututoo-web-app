@@ -4,7 +4,7 @@ from .views import EventView, EventCategoryView, EventOptionView, UserRegister, 
 from django.urls import path
 
 urlpatterns = [
-    path('events', EventView.as_view()),
+    path('events/', EventView.as_view()),
     path('event-category/', EventCategoryView.as_view()),
     path('event-option/', EventOptionView.as_view()),
     path('register/', UserRegister.as_view()),
