@@ -20,7 +20,7 @@ class RegisterUser(models.Model):
 class QuizCategory(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     img = models.ImageField(upload_to='media', blank=False, null=False)
-    date = models.DateField()
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -61,7 +61,7 @@ class UserProfile(models.Model):
     dob = models.DateField(blank=True, null=True)
     avatar = models.ImageField(upload_to='media', blank=True, null=True)
     mobile = models.CharField(max_length=12, blank=True, null=True)
-    public_key = models.CharField(max_length=16,  unique=True, blank=False)
+    public_key = models.CharField(max_length=16,  unique=True, blank=True, null=True)
     private_key = models.CharField(max_length=16, unique=True, blank=False)
     city = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(max_length=50, blank=True, null=True)
@@ -69,6 +69,7 @@ class UserProfile(models.Model):
 
     def save(self, *args, **kwargs):
         self.public_key = random_with_N_digits(12)
+        print(self.public_key, 'sdfsdfsdf')
         super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -80,8 +81,8 @@ class Transaction(models.Model):
     event = models.ForeignKey(Quizs, on_delete=models.CASCADE, null=True, blank=True)
     date_time = models.DateTimeField(auto_now_add=True)
     user_points = models.IntegerField(null=False, blank=False)  
-    points_method = models.IntegerField(choices=POINTS, null=False, blank=False)
-    points_status = models.IntegerField(choices=POINTS_STATUS, null=False, blank=False)
+    points_method = models.CharField(max_length=50, choices=POINTS, null=True, blank=True)
+    points_status = models.CharField(max_length=50, choices=POINTS_STATUS, null=True, blank=True)
 
     def __str__(self):
         return self.user.email

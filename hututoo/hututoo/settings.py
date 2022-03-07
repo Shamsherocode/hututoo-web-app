@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '_10obpnnx5aj7(#$7l8hcyu+972^7384dayjwc9@@37x!2tzlu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['api.psd2htmlx.com', 'www.api.psd2htmlx.com', '159.223.153.96', "*"]
 

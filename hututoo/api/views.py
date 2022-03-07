@@ -8,6 +8,7 @@ from .models import *
 from .serializers import *
 from .email import sendOTP
 from functools import partial
+from django.contrib.auth.hashers import make_password
 
 import json
 import threading
@@ -21,7 +22,6 @@ class EmailThread(threading.Thread):
     def run(self):
         self.sendOTP()
        
-
 class ReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
@@ -33,7 +33,6 @@ class MyPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in self.allowed_methods
-
 
 class UserRegister(APIView):
     # permission_classes = [ReadOnly]
@@ -126,11 +125,12 @@ class VerifyOTP(APIView):
                             user.is_verified = True
 
                             user.save()
-                            privat_key_gen = hashlib.sha256(b'data.email + data.id')
-                            key = privat_key_gen.hexdigest()
-                            profile = UserProfile(user = user, private_key = key)
+                            privat_key_gen = make_password(user.email + str(user.id))
+                            # privat_key_gen = hashlib.md5(user.email + str(user.id).encode('utf-8')).hexdigest() 
+                            # key = privat_key_gen.hexdigest()
+                            profile = UserProfile(user = user, private_key = privat_key_gen)
                             profile.save()
-                            points = Transaction(user = user, user_points=10000, points_method=1, points_status=1)
+                            points = Transaction(user = user, user_points=10000, points_method='SignUp Bonus', points_status='Credit')
                             points.save()
                         return Response({
                                 'status': 200,
@@ -216,8 +216,20 @@ class EventView(APIView):
 class TransactionView(APIView):
     def get(self, request, user):
         try: 
-            transaction = Transaction.objects.get(user__email=user)
-            transactions = TransactionSerializer(transaction)
-            return Response({'status': 200, 'payload': transactions.data})
+            transaction = Transaction.objects.filter(user__email=user)
+            serializer = TransactionSerializer(transaction, many=True)
+            total = 0
+            for i in serializer.data:
+                if i['points_status'] == 'Credit':
+                    total = total+i['user_points']
+                    print(total, 'sssssssssss')
+                else:
+                    total = total - i['user_points']
+
+            return Response({'status': 200, 'payload': serializer.data, 'total_points': total})
         except:
             return Response({'status': 400, 'message': 'Unauthenticted User'})
+
+
+def view_404(request, exception=None):
+    return Response({'status': 500, 'message': 'Invalid Request'})

@@ -1,6 +1,6 @@
-POINTS = ((1, 'SignUp Bonus'), (2, 'Referral Bonus'), (3, 'Events Points'))
+POINTS = (('SignUp Bonus', 'SignUp Bonus'), ('Referral Bonus', 'Referral Bonus'), ('Events Points', 'Events Points'))
 
-POINTS_STATUS = ((1, 'Credit'), (2, 'Debit'))
+POINTS_STATUS = (('Credit', 'Credit'), ('Debit', 'Debit'))
 
 COUNTRY = (
     (1, 'AFGHANISTAN'),
