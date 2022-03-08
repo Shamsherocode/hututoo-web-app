@@ -20,10 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_10obpnnx5aj7(#$7l8hcyu+972^7384dayjwc9@@37x!2tzlu'
+# SECRET_KEY = '_10obpnnx5aj7(#$7l8hcyu+972^7384dayjwc9@@37x!2tzlu'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['api.psd2htmlx.com', 'www.api.psd2htmlx.com', '159.223.153.96', "*"]
 
@@ -144,9 +146,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static')
+# ]
+
+STATIC_ROOT = '/static/'
 
 MEDIA_URL = '/media/'
 # MEDIA_ROOT = '/media/'
@@ -162,8 +166,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'email'
-EMAIL_HOST_PASSWORD = 'password'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # SendGrid Email Confuguration
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -176,3 +180,4 @@ EMAIL_HOST_PASSWORD = 'password'
 
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

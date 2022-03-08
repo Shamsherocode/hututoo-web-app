@@ -141,7 +141,7 @@ class VerifyOTP(APIView):
                 except:
                     return Response({
                         'status': 400,
-                        'message': 'Email not found. Please enter corrent Email Address',
+                        'message': 'Email not found. Please enter the correct Email Address',
                         
                     })
 
