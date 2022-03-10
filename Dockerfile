@@ -8,13 +8,11 @@ RUN pip install --upgrade pip
 # RUN pip install --upgrade pip
 # RUN apt-get update \
 #     && apt-get -y install libpq-dev gcc
-
+WORKDIR /app
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY ./hututoo /app
-
-WORKDIR /app
 
 COPY ./entrypoint.sh /
 ENTRYPOINT ["sh", "/entrypoint.sh"]

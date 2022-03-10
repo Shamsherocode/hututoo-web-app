@@ -2,33 +2,53 @@ version: '3.7'
 
 services:
   django_gunicorn:
-    volumes:
-      - static:/static
-      - media:/media
-    env_file:
-      - .env
     build:
       context: .
+    volumes:
+      - media:/media
+      - static:/static
+    env_file:
+      - .env
     ports:
     - "8000:8000"
+    # depends_on:
+    #   - postgres
+
+  frontend:
+    build:
+      context: ./react/blogapi
+    volumes:
+      - hututoo_build:/hututoo/build
+
+  # postgres:
+  #   image: postgres
+  #   networks:
+  #     - hututoo-backend-tier
+  #   environment:
+  #     - POSTGRES_DB=hututoo
+  #     - POSTGRES_USER=hututoo
+  #     - POSTGRES_PASSWORD=hututoo
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - pgdata:/var/lib/postgres
 
   nginx:
-    build: ./nginx
-    restart: always
-    volumes:
-      - static:/static
-      - media:/media
+    image: nginx:latest
+    # restart: always
     ports:
-      - 80:80
+      - 80:8080
+    volumes:
+      - ./nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
+      - hututoo_build:/var/www/hututoo
+      - media:/media
+      - static:/static
     depends_on:
       - django_gunicorn
 
-  # certbot:
-  #   image: certbot/certbot
-  #   volumes:
-  #     - "/var/lib/letsencrypt:/var/lib/letsencrypt"
-  #     - "/etc/letsencrypt:/etc/letsencrypt"
-  #   command: certbot --nginx -d api.psd2htmlx.com -d www.api.psd2htmlx.com
 volumes:
   static:
   media:
+  hututoo_build:
+  # hututoo_build:
+  
